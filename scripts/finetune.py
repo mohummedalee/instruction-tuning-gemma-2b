@@ -19,6 +19,7 @@ from peft import (
     prepare_model_for_kbit_training,
     TaskType
 )
+from prep_data import format_input, load_and_split_data
 
 # allow flexible memory allocation for CUDA and enable garbage collection
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True,garbage_collection_threshold:0.6'
@@ -52,39 +53,6 @@ class InstructionDataset(Dataset):
 
     def __len__(self):
         return len(self.data)
-
-def format_input(data_point):
-    """Format the input data point."""
-    instruction = data_point["instruction"]
-    input_text = data_point.get("input", "")
-    
-    if input_text:
-        return f"### Instruction:\n{instruction}\n\n### Input:\n{input_text}"
-    return f"### Instruction:\n{instruction}"
-
-def load_and_split_data(data_paths, train_split=0.85, test_split=0.1):
-    """Load and split data into train, validation and test sets."""
-    data = []
-    for path in data_paths:
-        with open(path, 'r') as f:
-            data.extend(json.load(f))
-    
-    N = len(data)
-    print(f'Total data: {N}')
-
-    train_portion = int(N * train_split)
-    test_portion = int(N * test_split)
-    val_portion = N - train_portion - test_portion
-
-    train_data = data[:train_portion]
-    test_data = data[train_portion:train_portion + test_portion]
-    val_data = data[train_portion + test_portion:]
-
-    print(f"Training set length: {len(train_data)}")
-    print(f"Validation set length: {len(val_data)}")
-    print(f"Test set length: {len(test_data)}")
-
-    return train_data, val_data, test_data
 
 def setup_lora_model(model, args):
     """Setup LoRA configuration and prepare model for training."""
