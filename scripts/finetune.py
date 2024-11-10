@@ -5,7 +5,6 @@ import json
 import gc
 import wandb
 import torch
-from torch.utils.data import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -19,7 +18,9 @@ from peft import (
     prepare_model_for_kbit_training,
     TaskType
 )
+
 from prep_data import format_input, load_and_split_data
+from data import InstructionDataset
 
 # allow flexible memory allocation for CUDA and enable garbage collection
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True,garbage_collection_threshold:0.6'
@@ -34,25 +35,6 @@ def token_ids_to_text(token_ids, tokenizer):
         text += word
     return text
 
-class InstructionDataset(Dataset):
-    def __init__(self, data, tokenizer):
-        self.data = data
-        self.encoded_texts = []
-        for entry in data:
-            instruction_plus_input = format_input(entry)
-            response_text = f"\n\n### Response:\n{entry['output']}"
-            full_text = instruction_plus_input + response_text
-            
-            # encode fully formatted data point
-            self.encoded_texts.append(
-                tokenizer.encode(full_text)
-            )
-
-    def __getitem__(self, ind):
-        return self.encoded_texts[ind]
-
-    def __len__(self):
-        return len(self.data)
 
 def setup_lora_model(model, args):
     """Setup LoRA configuration and prepare model for training."""
