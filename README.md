@@ -1,5 +1,7 @@
-# instruction-tuning-gemma-2b
-Fine-tuning a Gemma 2b model on Alpaca to follow instructions
+# Instruction-tuning Gemma-2b
+Fine-tuning a Gemma 2b model on Alpaca to follow instructions.
+
+**Blog post**: https://m-ali.org/posts/instruction-tuning-tutorial/
 
 
 What was used to fine-tune the model:
